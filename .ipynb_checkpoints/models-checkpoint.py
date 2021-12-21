@@ -7,7 +7,7 @@ from transformers.models.longformer import LongformerModel, LongformerPreTrained
 from transformers.models.big_bird import BigBirdModel, BigBirdPreTrainedModel, BigBirdForTokenClassification
 
 
-class Longformer_CRF_ForNER(LongformerPreTrainedModel):
+class LongformerCRFForNER(LongformerPreTrainedModel):
     _keys_to_ignore_on_load_unexpected = [r"pooler"]
     
     def __init__(self, config):
@@ -59,7 +59,7 @@ class Longformer_CRF_ForNER(LongformerPreTrainedModel):
         return outputs
 
 
-class BigBird_CRF_ForNER(BigBirdPreTrainedModel):
+class BigBirdCRFForNER(BigBirdPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
         self.num_labels = config.num_labels
@@ -114,21 +114,6 @@ class BigBird_CRF_ForNER(BigBirdPreTrainedModel):
             loss = self.crf(emissions=logits, tags=labels, mask=attention_mask)
             outputs = (-1 * loss,) + outputs
         return outputs
-
-
-class Longformer_BiLSTM_CRF_ForNER(LongformerPreTrainedModel):
-    _keys_to_ignore_on_load_unexpected = [r"pooler"]
-    
-    def __init__(self, config):
-        super().__init__(config, lstm_dim=128)
-        self.num_labels = config.num_labels
-        
-        self.longformer = LongformerModel(config, add_pooling_layer=False)
-        self.dropout = nn.Dropout(config.hidden_dropout_prob)
-        self.classifier = nn.Linear(config.hidden_size, config.num_labels)
-        self.crf = CRF(num_tags=config.num_labels, batch_first=True)
-        self.init_weights()
-
 
 
 class CRF(nn.Module):
